@@ -14,32 +14,40 @@ import com.fd.Jootay_Dev.dto.UserProgressDTO;
 import com.fd.Jootay_Dev.enums.ProgressStatus;
 import com.fd.Jootay_Dev.service.UserProgressService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/progress")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
+@Tag(name = "Progression", description = "Suivi de la progression par question")
 public class UserProgressController {
 
     private final UserProgressService progressService;
 
-    // Enregistrer le statut d'une question
     @PostMapping("/{questionId}")
+    @Operation(summary = "Enregistrer le statut d'une question", description = "Marque une question comme KNOWN ou UNKNOWN et retourne les stats globales mises à jour")
+    @ApiResponse(responseCode = "200", description = "Statut enregistré, stats retournées")
     public ResponseEntity<UserProgressDTO.GlobalStats> setStatus(
-            @PathVariable Long questionId,
-            @RequestParam ProgressStatus status) {
+            @Parameter(description = "ID de la question") @PathVariable Long questionId,
+            @Parameter(description = "Statut : KNOWN ou UNKNOWN") @RequestParam ProgressStatus status) {
         return ResponseEntity.ok(progressService.setStatus(questionId, status));
     }
 
-    // Récupérer les stats globales
     @GetMapping("/stats")
+    @Operation(summary = "Statistiques globales", description = "Retourne le nombre de questions maîtrisées, à revoir, et non touchées, par catégorie")
+    @ApiResponse(responseCode = "200", description = "Stats retournées")
     public ResponseEntity<UserProgressDTO.GlobalStats> getStats() {
         return ResponseEntity.ok(progressService.getStats());
     }
 
-    // Réinitialiser toute la progression
     @DeleteMapping("/reset")
+    @Operation(summary = "Réinitialiser la progression", description = "Supprime toute la progression enregistrée")
+    @ApiResponse(responseCode = "204", description = "Progression réinitialisée")
     public ResponseEntity<Void> reset() {
         progressService.reset();
         return ResponseEntity.noContent().build();

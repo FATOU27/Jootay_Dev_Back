@@ -16,33 +16,41 @@ import com.fd.Jootay_Dev.dto.SimulationDTO;
 import com.fd.Jootay_Dev.enums.QuestionCategory;
 import com.fd.Jootay_Dev.service.SimulationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/simulation")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
+@Tag(name = "Simulation", description = "Mode simulation d'entretien")
 public class SimulationController {
 
     private final SimulationService simulationService;
 
-    // Récupérer N questions aléatoires pour démarrer une session
     @GetMapping("/questions")
+    @Operation(summary = "Questions aléatoires pour une session", description = "Retourne N questions mélangées aléatoirement, filtrables par catégorie")
+    @ApiResponse(responseCode = "200", description = "Liste de questions aléatoires")
     public ResponseEntity<List<QuestionDTO>> getRandomQuestions(
-            @RequestParam(required = false) QuestionCategory category,
-            @RequestParam(defaultValue = "10") int count) {
+            @Parameter(description = "Catégorie (optionnel)") @RequestParam(required = false) QuestionCategory category,
+            @Parameter(description = "Nombre de questions (défaut: 10)") @RequestParam(defaultValue = "10") int count) {
         return ResponseEntity.ok(simulationService.getRandomQuestions(category, count));
     }
 
-    // Sauvegarder une session terminée
     @PostMapping("/session")
+    @Operation(summary = "Sauvegarder une session", description = "Enregistre le résultat d'une session et met à jour la progression des questions ratées")
+    @ApiResponse(responseCode = "200", description = "Session sauvegardée avec résumé")
     public ResponseEntity<SimulationDTO.SessionResponse> saveSession(
             @RequestBody SimulationDTO.SaveSessionRequest request) {
         return ResponseEntity.ok(simulationService.saveSession(request));
     }
 
-    // Historique de toutes les sessions
     @GetMapping("/history")
+    @Operation(summary = "Historique des sessions", description = "Retourne toutes les sessions triées par date décroissante")
+    @ApiResponse(responseCode = "200", description = "Historique retourné")
     public ResponseEntity<List<SimulationDTO.SessionResponse>> getHistory() {
         return ResponseEntity.ok(simulationService.getHistory());
     }
